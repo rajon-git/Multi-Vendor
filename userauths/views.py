@@ -6,6 +6,12 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 import random
 import shortuuid
+from django.http import JsonResponse
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+from rest_framework.response import Response
+from rest_framework import status
 
 # Create your views here.
 
@@ -39,13 +45,23 @@ class PasswordResetEmailVerify(generics.RetrieveAPIView):
 
             link = f"http://localhost:5173/create-new-password?otp={otp}&uidb64={uidb64}"
             # send email
-            
+
             merge_data = {
                 'link': link, 
                 'username': user.username, 
             }
 
-            
+            subject = f"Password Reset Request"
+            # text_body = render_to_string("email/password_reset.txt", merge_data)
+            html_body = render_to_string("email/password_reset.html", merge_data)
+
+            msg = EmailMultiAlternatives(
+                subject=subject, from_email=settings.EMAIL_HOST_USER,
+                to=[user.email], body=html_body
+            )
+
+            msg.attach_alternative(html_body, "text/html")
+            msg.send()
         return user
     
 class PasswordChangeView(generics.CreateAPIView):
@@ -56,7 +72,6 @@ class PasswordChangeView(generics.CreateAPIView):
         payload = request.data 
         otp = payload['otp']
         uidb64 = payload['uidb64']
-        reset_token = payload['reset_token']
         password = payload['password']
 
         user = User.objects.get(id=uidb64, otp=otp)

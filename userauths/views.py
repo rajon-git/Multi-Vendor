@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 # Create your views here.
 
@@ -34,7 +35,10 @@ class PasswordResetEmailVerify(generics.RetrieveAPIView):
 
     def get_object(self):
         email = self.kwargs['email']
-        user = User.objects.get(email=email)
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise ValidationError({"email": "No user found with this email address."})
 
         if user:
             user.otp = generate_otp()

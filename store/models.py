@@ -108,3 +108,48 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"{self.cart_id} - {self.product.title}"
+    
+class CartOrder(models.Model):
+
+    PAYMENT_STATUS = (
+        ("paid", "Paid"),
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("cancelled", "Cancelled"),
+    )
+
+    ORDER_STATUS = (
+        ("pending", "Pending"),
+        ("fulfilled", "Fulfilled"),
+        ("cancelled", "Cancelled"),
+    )
+
+    vendor = models.ManyToManyField(Vendor,blank=True)
+    buyer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    shipping_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    service_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    tax_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    payment_status = models.CharField(choices = PAYMENT_STATUS, max_length=100, default="pending")
+    order_status = models.CharField(choices = ORDER_STATUS, max_length=100, default="pending")
+
+    #coupons
+    initial_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    saved = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    full_name = models.CharField(max_length=100, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True, blank=True)
+    mobile = models.CharField(max_length=100, null=True, blank=True)
+
+    address = models.CharField(max_length=200, null=True, blank=True)
+    city = models.CharField(max_length=200, null=True, blank=True)
+    state = models.CharField(max_length=200, null=True, blank=True)
+    country = models.CharField(max_length=200, null=True, blank=True)
+
+    oid = ShortUUIDField(unique=True, length = 10, alphabet="abcdefg12345")
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.oid

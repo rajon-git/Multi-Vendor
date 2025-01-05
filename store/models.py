@@ -257,6 +257,18 @@ class Notification(models.Model):
         else:
             return f"Notification - {self.pk}"
 
+class Coupon(models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    user_by = models.ManyToManyField(User, blank=True)
+    code = models.CharField(max_length=1000)
+    discount = models.IntegerField(default=1)
+    active = models.BooleanField(default=False)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.code
+
+
 
 
 

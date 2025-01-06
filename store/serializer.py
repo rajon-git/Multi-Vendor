@@ -7,11 +7,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
-
 class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specification
@@ -31,3 +26,45 @@ class ColorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Color
         fields = '__all__'
+
+class ProductSerializer(serializers.ModelSerializer):
+    gallery = GallerySerializer(many=True, read_only = True)
+    color = ColorSerializer(many=True, read_only = True)
+    size = SizeSerializer(many=True, read_only = True)
+    specification = SpecificationSerializer(many=True, read_only = True)
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'image',
+            'description',
+            'category',
+            'price',
+            'old_price',
+            'shipping_amount',
+            'stock_qty',
+            'in_stock',
+            'status',
+            'featured',
+            'views',
+            'ratings',
+            'vendor',
+            'gallery',
+            'color',
+            'size',
+            'specification',
+            'product_rating',
+            'rating_count',
+            'pid',
+            'slug',
+            'date',
+        ]
+    def __init__(self, *args, **kwargs):
+        super(ProductSerializer, self).__init__(*args, **kwargs)
+
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3

@@ -10,7 +10,7 @@ from django.db.models.signals import post_save
 
 class Category(models.Model):
     title = models.CharField(max_length=100)
-    image = models.FileField(upload_to="category", default="category.jpg", null=True, blank=True)
+    image = models.FileField(upload_to="category", null=True, blank=True)
     active = models.BooleanField(default=True)
     slug = models.SlugField(unique=True)
 
@@ -20,6 +20,11 @@ class Category(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Category, self).save(*args, **kwargs)
 
 class Product(models.Model):
     STATUS = (
@@ -78,6 +83,8 @@ class Product(models.Model):
        
 
     def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
         self.rating = self.product_rating()
         super(Product, self).save(*args, **kwargs)
     

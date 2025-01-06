@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Product, Category, Gallery, Specification,  Size, Color, Cart, CartOrder, CartOrderItem, ProductFaq, Review,Wishlist, Notification, Coupon
+from vendor.models import Vendor
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -118,6 +119,20 @@ class ProductFaqSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super(ProductFaqSerializer, self).__init__(*args, **kwargs)
+
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
+class VendorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vendor
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(VendorSerializer, self).__init__(*args, **kwargs)
 
         request = self.context.get('request')
         if request and request.method == 'POST':

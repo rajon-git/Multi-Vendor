@@ -110,3 +110,17 @@ class CartOrderItemSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+
+class ProductFaqSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductFaq
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(ProductFaqSerializer, self).__init__(*args, **kwargs)
+
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3

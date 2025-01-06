@@ -16,3 +16,8 @@ class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specification
         fields = '__all__'
+
+class GallerySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gallery
+        fields = '__all__'

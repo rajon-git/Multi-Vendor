@@ -139,3 +139,17 @@ class VendorSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(ReviewSerializer, self).__init__(*args, **kwargs)
+
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3

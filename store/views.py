@@ -14,3 +14,11 @@ class ProductListAPIView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
+
+class ProductDetailsAPIView(generics.RetrieveAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        slug = self.kwargs['slug']
+        return Product.objects.get(slug = slug)

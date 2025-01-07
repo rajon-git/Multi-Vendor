@@ -48,7 +48,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'status',
             'featured',
             'views',
-            'ratings',
+            'rating',
             'vendor',
             'gallery',
             'color',

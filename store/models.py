@@ -46,24 +46,22 @@ class Product(models.Model):
 
     status = models.CharField(max_length=100, choices=STATUS, default="published")
     featured = models.BooleanField(default=False)
-    views = models.PositiveIntegerField(default=0)
-    ratings = models.PositiveIntegerField(default=0)
+    views = models.PositiveIntegerField(default=0, null=True, blank=True)
+    rating = models.IntegerField(default=0, null=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     pid = ShortUUIDField(unique=True, length = 10, alphabet="abcdefg12345") 
     slug= models.SlugField(unique=True)
     date = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
-        if self.slug == "" or self.slug == None:
-            self.slug = slugify(self.title)
-
-        super(Vendor, self).save(*args, **kwargs)
+    class Meta:
+        ordering = ['-id']
+        verbose_name_plural = "Products"
 
     def __str__(self):
         return self.title
 
     def product_rating(self):
-        product_rating = Review.objects.filter(product = self).aggregate(avg_rating = models.Avg("rating"))
+        product_rating = Review.objects.filter(product=self).aggregate(avg_rating=models.Avg('rating'))
         return product_rating['avg_rating']
     
     def rating_count(self):
@@ -83,10 +81,29 @@ class Product(models.Model):
        
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
-        self.rating = self.product_rating()
+        # Generate a unique slug if it does not exist
+        if self.slug == "" or self.slug is None:
+            uuid_key = shortuuid.uuid()
+            uniqueid = uuid_key[:4]
+            self.slug = slugify(self.title) + "-" + str(uniqueid.lower())
+        
+        # Update the stock status based on stock quantity
+        if self.stock_qty is not None:
+            if self.stock_qty == 0:
+                self.in_stock = False
+            elif self.stock_qty > 0:
+                self.in_stock = True
+        else:
+            self.stock_qty = 0
+            self.in_stock = False
+        
+        # Save the instance to ensure it has a valid primary key
         super(Product, self).save(*args, **kwargs)
+        
+        # Calculate and update the product rating after the instance is saved
+        self.rating = self.product_rating()
+        super(Product, self).save(update_fields=['rating'])
+
     
 class Gallery(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

@@ -1,9 +1,11 @@
 from django.shortcuts import render
-from .models import Category, Product, Cart, CartOrder, CartOrderItem
+from .models import Category, Tax, Product, Cart, CartOrder, CartOrderItem
 from .serializer import CategorySerializer, ProductSerializer, CartOrderItemSerializer, CartSerializer, CartOrderSerializer
-from rest_framework import generics
+from rest_framework import generics,status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from userauths.models import User
+from decimal import Decimal
+from rest_framework.response import Response
 
 # Create your views here.
 class CategoryListAPIView(generics.ListAPIView):
@@ -48,3 +50,50 @@ class CartAPIView(generics.ListCreateAPIView):
             user = User.objects.get(id = user_id)
         else:
             user=None
+        tax = Tax.objects.filter(country=country).first()
+        if tax:
+            tax_rate = tax.rate / 100
+        else:
+            tax_rate = 0
+
+        cart = Cart.objects.filter(cart_id = cart_id, product = product).first()
+
+        if cart:
+            cart.product = product
+            cart.user = user
+            cart.qty = qty
+            cart.price = price
+            cart.sub_total = Decimal(price) * Decimal(qty)
+            cart.shipping_amount = Decimal(shipping_amount) * Decimal(qty)
+            cart.tax_fee = int(qty) * Decimal(tax_rate)
+            cart.color = color
+            cart.size = size
+            cart.country = country
+            cart.cart_id = cart_id
+
+            service_fee_perchnatage = 10 / 100
+            cart.service_fee = service_fee_perchnatage * cart.sub_total
+            cart.total = cart.shipping_amount + cart.sub_total + cart.tax_fee + cart.service_fee
+            cart.save()
+
+            return Response({'message': 'Cart Updated Successfully'}, status=status.HTTP_200_OK)
+        else:
+            cart = Cart()
+            cart.product = product
+            cart.user = user
+            cart.qty = qty
+            cart.price = price
+            cart.sub_total = Decimal(price) * Decimal(qty)
+            cart.shipping_amount = Decimal(shipping_amount) * Decimal(qty)
+            cart.tax_fee = int(qty) * Decimal(tax_rate)
+            cart.color = color
+            cart.size = size
+            cart.country = country
+            cart.cart_id = cart_id
+
+            service_fee_perchnatage = 10 / 100
+            cart.service_fee = service_fee_perchnatage * cart.sub_total
+            cart.total = cart.shipping_amount + cart.sub_total + cart.tax_fee + cart.service_fee
+            cart.save()
+
+            return Response({'message': 'Cart Created Successfully'}, status=status.HTTP_201_CREATED)

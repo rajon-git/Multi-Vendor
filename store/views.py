@@ -27,9 +27,9 @@ class ProductDetailsAPIView(generics.RetrieveAPIView):
         return Product.objects.get(slug = slug)
     
 class CartAPIView(generics.ListCreateAPIView):
-    queryset = Cart.objects.all()
     serializer_class = CartSerializer
-    permission_classes = [AllowAny]
+    queryset = Cart.objects.all()
+    permission_classes = (AllowAny,)
 
     def create(self, request, *args, **kwargs):
         payload = request.data
@@ -72,7 +72,7 @@ class CartAPIView(generics.ListCreateAPIView):
             cart.cart_id = cart_id
 
             service_fee_perchnatage = 10 / 100
-            cart.service_fee = service_fee_perchnatage * cart.sub_total
+            cart.service_fee = Decimal(service_fee_perchnatage) * cart.sub_total
             cart.total = cart.shipping_amount + cart.sub_total + cart.tax_fee + cart.service_fee
             cart.save()
 
@@ -92,7 +92,7 @@ class CartAPIView(generics.ListCreateAPIView):
             cart.cart_id = cart_id
 
             service_fee_perchnatage = 10 / 100
-            cart.service_fee = service_fee_perchnatage * cart.sub_total
+            cart.service_fee = Decimal(service_fee_perchnatage) * cart.sub_total
             cart.total = cart.shipping_amount + cart.sub_total + cart.tax_fee + cart.service_fee
             cart.save()
 

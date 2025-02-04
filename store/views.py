@@ -163,3 +163,20 @@ class CartDetailView(generics.RetrieveAPIView):
         return cart_item.sub_total
     def calculate_total(self, cart_item):
         return cart_item.total
+    
+class CartItemDeleteAPIView(generics.DestroyAPIView):
+    serializer_class = CartSerializer
+    lookup_field ='cart_id'
+
+    def get_object(self):
+        cart_id = self.kwargs['cart_id']
+        item_id = self.kwargs['item_id']
+        user_id = self.kwargs.get('user_id')
+
+        if user_id is not None:
+            user = User.objects.get(id=user_id)
+            cart = Cart.objects.get(id=item_id, cart_id=cart_id, user=user)
+        else:
+            cart = Cart.objects.get(id=item_id, cart_id=cart_id)
+
+        return cart
